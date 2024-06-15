@@ -5,6 +5,7 @@
 #include <functional>
 #include "Coordinate.hpp"
 #include "Object.hpp"
+#include <tuple>
 
 // #define PLAYER_SYMBOL "(^_^)"
 // #define ENEMY_SYMBOL "(X_X)"
@@ -44,7 +45,7 @@ int display(std::vector<Object> objects, size_t t) {
   return 0;
 }
 
-std::vector<Object> collision(std::vector<Object> objects, size_t t) {
+std::tuple<std::vector<Object>, int> collision(std::vector<Object> objects, size_t t) {
   // player vs enemy: player dies
   // enemy vs bullet(player): enemy dies
   // player vs bullet(enemy): player dies
@@ -65,7 +66,7 @@ std::vector<Object> collision(std::vector<Object> objects, size_t t) {
 		}
 	}
   }
-  return objects;
+  return make_tuple(objects, 0);
 }
 
 std::vector<Object> update(std::vector<Object> objects, int ch, int t) {
@@ -97,6 +98,7 @@ int main(void) {
   objects.push_back(Object(10, 10, t, [](int t) { (void)t; return Coordinate(0, 0); }, 'P'));
   //enemy
   objects.push_back(Object(20, 10, t, [](int t) { (void)t; return Coordinate(0, 0); }, 'X'));
+  int score = 0;
 
   initscr();
   timeout(1);
@@ -106,7 +108,10 @@ int main(void) {
       break;
     }
     objects = update(objects, ch, t);
-    objects = collision(objects, t);
+	auto [new_objs, new_score] = collision(objects, t);
+	objects = new_objs;
+	score += new_score;
+
 	display(objects, t);
 	usleep(FLAME_RATE);
 	t++;
