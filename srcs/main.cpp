@@ -103,9 +103,9 @@ int main(void) {
   size_t frame_tick = 0; // increment every 100ms
 
   // player spawn
-  objects.push_back(new Player(10, 10, frame_tick, [](int t) { (void)t; return Coordinate(0, 0); }, 'P'));
-  //enemy (tmp)
-  objects.push_back(new Enemy(20, 10, frame_tick, [](int t) { (void)t; return Coordinate(0, 0); }, 'X'));
+  objects.push_back(new Player(10, 10, frame_tick, [](int t) {return Coordinate(-t, 0); }, 'P'));
+  //enemy
+  objects.push_back(new Enemy(40, 10, frame_tick, [](int t) {return Coordinate(-t, 0); }, 'X'));
   int score = 0;
   initscr();
   noecho(); // キーが入力されても表示しない
