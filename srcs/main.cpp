@@ -90,18 +90,20 @@ std::tuple<std::vector<Object>, int> collision(std::vector<Object> objects, size
 
 std::vector<Object> update(std::vector<Object> objects, int ch, int t) {
   Object player = objects[0];
+  int x, y;
+  getmaxyx(stdscr, y, x);
   switch (ch) {
     case 'w':
-      player.y--;
+      player.y == 1 ? player.y = 1 : player.y--;
       break;
     case 's':
-      player.y++;
+	  player.y == y - 3 ? player.y = y - 3 : player.y++;
       break;
     case 'a':
-      player.x--;
+	  player.x == 1 ? player.x = 1 : player.x--;
       break;
     case 'd':
-      player.x++;
+	  player.x == x - 2 ? player.x = x - 2 : player.x++;
       break;
     case ' ':
       objects.push_back(Object(player.x + 1, player.y, t, [](int t) { (void)t; return Coordinate(t, 0); }, 'o'));
