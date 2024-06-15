@@ -2,20 +2,13 @@
 #include <stdio.h>
 #include <vector>
 #include <unistd.h>
+#include <functional>
+#include "Coordinate.hpp"
+#include "Object.hpp"
 
 #define PLAYER_SYMBOL "(^_^)"
 #define ENEMY_SYMBOL "(X_X)"
 #define FLAME_RATE 100000
-
-struct Coordinate {
-    public:
-    int x;
-    int y;
-    Coordinate(int x, int y) {
-    this->x = x;
-    this->y = y;
-    }
-};
 
 int	main(void);
 
@@ -61,6 +54,10 @@ int	game_over() {
 	}
 }
 
+Coordinate get_coordinate(int t) {
+	return Coordinate(5, 5 + 2 * t);
+}
+
 int	display(Coordinate player, std::vector<Coordinate> enemies) {
 	clear();
 	mvprintw(player.y, player.x, PLAYER_SYMBOL);
@@ -71,22 +68,43 @@ int	display(Coordinate player, std::vector<Coordinate> enemies) {
 	return 0;
 }
 
+int display(std::vector<Object> objects, size_t t) {
+  clear();
+  for (size_t i = 0; i < objects.size(); i++) {
+	Coordinate c = objects[i].get_coordinate(t);
+	mvprintw(c.y, c.x, PLAYER_SYMBOL);
+  }
+  refresh();
+  return 0;
+}
+
+Coordinate no_speed(int t) {
+  (void) t;
+  return Coordinate(t, 0);
+}
+
 int main(void) {
-  Coordinate player(0, 0);
-  std::vector<Coordinate> enemies;
-  enemies.push_back(Coordinate(10, 10));
-  enemies.push_back(Coordinate(20, 20));
+  std::vector<Object> objects;
+  objects.push_back(Object(10, 10, [](int t) { return Coordinate(t, 0); }));
+
+//   Coordinate player(0, 0);
+//   std::vector<Coordinate> enemies;
+//   enemies.push_back(Coordinate(10, 10));
+//   enemies.push_back(Coordinate(20, 20)); 
   initscr();
+  size_t t = 0;
   while (1) {
-    int ch = getch();
-    if (ch == 'q') {
-      break;
-    }
-    player = update(player, ch);
-	if (collide(player, enemies))
-		return game_over();
-	else
-		display(player, enemies);
+    // int ch = getch();
+    // if (ch == 'q') {
+    //   break;
+    // }
+
+    // update(player, ch);
+	// if (collide(player, enemies))
+	// 	return game_over();
+	// else
+	display(objects, t);
 	usleep(FLAME_RATE);
+	t++;
   }
 }
