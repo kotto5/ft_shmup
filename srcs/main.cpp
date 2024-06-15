@@ -19,7 +19,7 @@ struct Coordinate {
 
 int	main(void);
 
-Coordinate update(Coordinate player, std::vector<Coordinate> enemies, int ch) {
+Coordinate update(Coordinate player, int ch) {
   switch (ch) {
     case 'w':
       player.y--;
@@ -34,12 +34,6 @@ Coordinate update(Coordinate player, std::vector<Coordinate> enemies, int ch) {
       player.x++;
       break;
   }
-  clear();
-  mvprintw(player.y, player.x, PLAYER_SYMBOL);
-  for (size_t i = 0; i < enemies.size(); i++) {
-	mvprintw(enemies[i].y, enemies[i].x, ENEMY_SYMBOL);
-  }
-  refresh();
   return player;
 }
 
@@ -67,6 +61,16 @@ int	game_over() {
 	}
 }
 
+int	display(Coordinate player, std::vector<Coordinate> enemies) {
+	clear();
+	mvprintw(player.y, player.x, PLAYER_SYMBOL);
+	for (size_t i = 0; i < enemies.size(); i++) {
+		mvprintw(enemies[i].y, enemies[i].x, ENEMY_SYMBOL);
+	}
+	refresh();
+	return 0;
+}
+
 int main(void) {
   Coordinate player(0, 0);
   std::vector<Coordinate> enemies;
@@ -78,9 +82,11 @@ int main(void) {
     if (ch == 'q') {
       break;
     }
-    player = update(player, enemies, ch);
+    player = update(player, ch);
 	if (collide(player, enemies))
 		return game_over();
+	else
+		display(player, enemies);
 	usleep(FLAME_RATE);
   }
 }
