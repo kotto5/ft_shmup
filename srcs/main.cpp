@@ -6,20 +6,16 @@
 #include "Coordinate.hpp"
 #include "Object.hpp"
 
-#define PLAYER_SYMBOL "(^_^)"
-#define ENEMY_SYMBOL "(X_X)"
+// #define PLAYER_SYMBOL "(^_^)"
+// #define ENEMY_SYMBOL "(X_X)"
+
+#define PLAYER_SYMBOL 'P'
+#define ENEMY_SYMBOL 'X'
+#define BULLET_SYMBOL 'o'
+
 #define FLAME_RATE 100000
 
 int	main(void);
-
-bool collide(Coordinate player, std::vector<Coordinate> enemies) {
-	for (size_t i = 0; i < enemies.size(); i++) {
-		if (player.x == enemies[i].x && player.y == enemies[i].y) {
-			return true;
-		}
-	}
-	return false;
-}
 
 int	game_over() {
 	clear();
@@ -48,6 +44,46 @@ int display(std::vector<Object> objects, size_t t) {
   return 0;
 }
 
+void collision(std::vector<Object> objects) {
+  // player vs enemy: player dies
+  // enemy vs bullet(player): enemy dies
+  // player vs bullet(enemy): player dies
+  // player vs obstacle: dont't move | player dies
+  // enemy vs obstacle: no effect
+  Object player = objects[0];
+  for (size_t i = 1; i < objects.size(); i++) {
+    if (objects[i].symbol == ENEMY_SYMBOL) { // player vs bullet(enemy): player dies
+      Object enemy = objects[i];
+      if (player.x == enemy.x && player.y == enemy.y) {
+        game_over();
+      }
+    }
+    else if (objects[i].symbol == BULLET_SYMBOL) // enemy vs bullet(player): enemy dies | player vs bullet(enemy): player dies
+    {
+      Object bullet = objects[i];
+      for (size_t i = 1; i < objects.size(); i++) {
+        if (objects[i].symbol == ENEMY_SYMBOL) {
+          if (bullet.x == objects[i].x && bullet.y == objects[i].y) {
+            objects.erase(objects.begin() + i);
+          }
+        }
+      }
+    }
+
+
+  }
+}
+
+bool collide(Coordinate player, std::vector<Coordinate> enemies) {
+	for (size_t i = 0; i < enemies.size(); i++) {
+		if (player.x == enemies[i].x && player.y == enemies[i].y) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
 std::vector<Object> update(std::vector<Object> objects, int ch, int t) {
   Object player = objects[0];
   switch (ch) {
@@ -63,8 +99,9 @@ std::vector<Object> update(std::vector<Object> objects, int ch, int t) {
     case 'd':
       player.x++;
       break;
-	case ' ':
-	  objects.push_back(Object(player.x, player.y, t, [](int t) { (void)t; return Coordinate(t, 0); }, 'o'));
+    case ' ':
+      objects.push_back(Object(player.x, player.y, t, [](int t) { (void)t; return Coordinate(t, 0); }, 'o'));
+      break;
   }
   objects[0] = player;
   return objects;
@@ -85,6 +122,7 @@ int main(void) {
       break;
     }
     objects = update(objects, ch, t);
+    collision(objects);
 	// if (collide(player, enemies))
 	// 	return game_over();
 	// else
