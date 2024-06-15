@@ -31,7 +31,8 @@ public:
 			this->x > right_bound  ? this->x = right_bound : this->x++;
 		}
 		else if (ch == ' ') {
-			objects.push_back(new Bullet(x - t / frequency, y, t, [](int t) { return Coordinate(t, 0); }, BULLET_SYMBOL, 1));
+			Coordinate bullet_spawn = this->get_coordinate(t);
+			objects.push_back(new Bullet(bullet_spawn.x, bullet_spawn.y, t, [](int t) { return Coordinate(t, 0); }, BULLET_SYMBOL, 1));
 		}
 		return objects;
 	}
