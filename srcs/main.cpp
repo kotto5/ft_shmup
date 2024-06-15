@@ -8,6 +8,7 @@
 #include <tuple>
 #include "Player.hpp"
 #include "Enemy.hpp"
+#include <stdlib.h>
 
 #define FLAME_RATE 100000
 
@@ -95,6 +96,8 @@ int main(void) {
   objects.push_back(new Enemy(20, 10, t, [](int t) { (void)t; return Coordinate(0, 0); }, 'X'));
   int score = 0;
   initscr();
+  noecho(); //キーが入力されても表示しない
+  curs_set(0);//カーソルを非表示
   timeout(1);
   while (1) {
     int ch = getch();
