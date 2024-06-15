@@ -9,7 +9,7 @@
 #include "Player.hpp"
 #include "Enemy.hpp"
 #include <stdlib.h>
-
+#include <string.h>
 #include <chrono>
 #include <ctime>
 #include <stdlib.h>
@@ -18,9 +18,22 @@
 
 int	main(void);
 
+void center_print(const char *str, int y) {
+  int x, w, h;
+  getmaxyx(stdscr, h, w);
+  (void) h;
+  x = (w - strlen(str)) / 2;
+  mvprintw(y, x, str);
+}
+
 int	game_over() {
 	clear();
-	mvprintw(10, 10, "Game Over\n If you want to quit press 'q'. If you want to play again press 'n'.");
+  int w, h;
+  getmaxyx(stdscr, h, w);
+  (void) w;
+  center_print("Game Over", h / 2);
+  center_print("If you want to quit press 'q'.", h / 2 + 3);
+  center_print("If you want to play again press 'n'.", h / 2 + 4);
 	refresh();
 	while (1) {
 		int ch = getch();
@@ -40,7 +53,7 @@ int display(std::vector<Object *> objects, int score, size_t t) {
     Coordinate c = objects[i]->get_coordinate(t);
     char synbol = objects[i]->get_symbol();
     char tmp[2] = {synbol, '\0'};
-    mvprintw(c.y, c.x, tmp); // no camera move temporary
+    mvprintw(c.y, c.x, tmp); // no camera move
   }
   int  x, y, w, h;
   x = 0;
@@ -63,11 +76,6 @@ int display(std::vector<Object *> objects, int score, size_t t) {
 }
 
 std::tuple<std::vector<Object *>, int> collision(std::vector<Object *> objects, size_t t) {
-  // player vs enemy: player dies
-  // enemy vs bullet(player): enemy dies
-  // player vs bullet(enemy): player dies
-  // player vs obstacle: dont't move | player dies
-  // enemy vs obstacle: no effect
   int gained_score = 0;
 
   for (size_t i = 0; i < objects.size(); i++) {
