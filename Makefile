@@ -15,7 +15,7 @@ OBJS	=	$(addprefix $(OBJDIR)/, $(notdir $(SRCS:.cpp=.o)))
 DEPS	=	$(addprefix $(OBJDIR)/, $(notdir $(SRCS:.cpp=.d)))
 
 CXX		=	c++
-CXXFLAGS	= 	-std=c++11 -Wall -Wextra -Werror -g -MMD -MP
+CXXFLAGS	= 	-std=c++17 -Wall -Wextra -Werror -g -MMD -MP
 
 RM		=	rm -rf
 

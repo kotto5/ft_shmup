@@ -33,7 +33,7 @@ int	game_over() {
 	}
 }
 
-int display(std::vector<Object> objects, size_t t) {
+int display(std::vector<Object> objects, int score, size_t t) {
   clear();
   for (size_t i = 0; i < objects.size(); i++) {
 	Coordinate c = objects[i].get_coordinate(t);
@@ -41,6 +41,22 @@ int display(std::vector<Object> objects, size_t t) {
 	char tmp[2] = {synbol, '\0'};
 	mvprintw(c.y, c.x, tmp);
   }
+  int  x, y, w, h;
+  x = 0;
+  getmaxyx(stdscr, h, w);
+  for (y = 0; y < h; y++) {
+    for (x = 0; x < w; x++) {
+      if (y == 0 || y == h - 2) {
+        mvprintw(y, x, "-");
+      }
+      if ((x == 0 || x == w - 1) && (y != 0 && y < h - 2)) {
+        mvprintw(y, x, "|");
+      }
+    }
+    x = 0;
+    
+  }
+  mvprintw(h - 1, 0, "Score: %d", score);
   refresh();
   return 0;
 }
@@ -51,6 +67,8 @@ std::tuple<std::vector<Object>, int> collision(std::vector<Object> objects, size
   // player vs bullet(enemy): player dies
   // player vs obstacle: dont't move | player dies
   // enemy vs obstacle: no effect
+  int gained_score = 0;
+
   for (size_t i = 0; i < objects.size(); i++) {
 	for (size_t j = i + 1; j < objects.size(); j++) {
 		if (objects[i].get_coordinate(t) == objects[j].get_coordinate(t)) {
@@ -58,6 +76,7 @@ std::tuple<std::vector<Object>, int> collision(std::vector<Object> objects, size
 				game_over();
 			}
 			else if (objects[i].symbol == ENEMY_SYMBOL && objects[j].symbol == BULLET_SYMBOL) {
+        gained_score += 100;
 				objects.erase(objects.begin() + i);
 				objects.erase(objects.begin() + j - 1);
 				i--;
@@ -66,7 +85,7 @@ std::tuple<std::vector<Object>, int> collision(std::vector<Object> objects, size
 		}
 	}
   }
-  return make_tuple(objects, 0);
+  return make_tuple(objects, gained_score);
 }
 
 std::vector<Object> update(std::vector<Object> objects, int ch, int t) {
@@ -92,6 +111,7 @@ std::vector<Object> update(std::vector<Object> objects, int ch, int t) {
   return objects;
 }
 
+
 int main(void) {
   std::vector<Object> objects;
   size_t t = 0;
@@ -99,7 +119,6 @@ int main(void) {
   //enemy
   objects.push_back(Object(20, 10, t, [](int t) { (void)t; return Coordinate(0, 0); }, 'X'));
   int score = 0;
-
   initscr();
   timeout(1);
   while (1) {
@@ -108,12 +127,11 @@ int main(void) {
       break;
     }
     objects = update(objects, ch, t);
-	auto [new_objs, new_score] = collision(objects, t);
-	objects = new_objs;
-	score += new_score;
-
-	display(objects, t);
-	usleep(FLAME_RATE);
-	t++;
+    auto [new_objs, new_score] = collision(objects, t);
+    objects = new_objs;
+    score += new_score;
+    display(objects, score, t);
+    usleep(FLAME_RATE);
+    t++;
   }
 }
