@@ -1,9 +1,11 @@
 #include <ncurses.h>
 #include <stdio.h>
 #include <vector>
+#include <unistd.h>
 
 #define PLAYER_SYMBOL "(^_^)"
 #define ENEMY_SYMBOL "(X_X)"
+#define FLAME_RATE 100000
 
 struct Coordinate {
     public:
@@ -14,6 +16,8 @@ struct Coordinate {
     this->y = y;
     }
 };
+
+int	main(void);
 
 Coordinate update(Coordinate player, std::vector<Coordinate> enemies, int ch) {
   switch (ch) {
@@ -77,6 +81,6 @@ int main(void) {
     player = update(player, enemies, ch);
 	if (collide(player, enemies))
 		return game_over();
+	usleep(FLAME_RATE);
   }
-  endwin();
 }
