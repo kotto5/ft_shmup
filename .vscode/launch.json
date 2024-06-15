@@ -1,0 +1,26 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "ft_shmup",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/ft_shmup",
+			"args": [
+				// if you want to pass arguments to your program
+			],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}",
+			"environment": [],
+			"externalConsole": true,
+			"preLaunchTask": "build_shmup",
+			"linux": {
+				"MIMode": "gdb",
+				"miDebuggerPath": "/usr/bin/gdb"
+			},
+			"osx": {
+				"MIMode": "lldb",
+			},
+		}
+	]
+}

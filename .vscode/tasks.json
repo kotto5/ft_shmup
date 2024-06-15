@@ -1,0 +1,21 @@
+{
+    "tasks": [
+		{
+			"type": "cppbuild",
+			"label": "build_shmup",
+			"command": "make",
+			"args": [
+				"debug",
+				"-C", "${workspaceFolder}",
+			],
+			"options": {
+				"cwd": "${fileDirname}"
+			},
+            "problemMatcher": [
+                "$gcc"
+            ],
+			"group": "build",
+		},
+    ],
+    "version": "2.0.0"
+}
