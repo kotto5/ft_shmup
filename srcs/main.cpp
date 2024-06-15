@@ -12,24 +12,6 @@
 
 int	main(void);
 
-Coordinate update(Coordinate player, int ch) {
-  switch (ch) {
-    case 'w':
-      player.y--;
-      break;
-    case 's':
-      player.y++;
-      break;
-    case 'a':
-      player.x--;
-      break;
-    case 'd':
-      player.x++;
-      break;
-  }
-  return player;
-}
-
 bool collide(Coordinate player, std::vector<Coordinate> enemies) {
 	for (size_t i = 0; i < enemies.size(); i++) {
 		if (player.x == enemies[i].x && player.y == enemies[i].y) {
@@ -54,20 +36,6 @@ int	game_over() {
 	}
 }
 
-Coordinate get_coordinate(int t) {
-	return Coordinate(5, 5 + 2 * t);
-}
-
-int	display(Coordinate player, std::vector<Coordinate> enemies) {
-	clear();
-	mvprintw(player.y, player.x, PLAYER_SYMBOL);
-	for (size_t i = 0; i < enemies.size(); i++) {
-		mvprintw(enemies[i].y, enemies[i].x, ENEMY_SYMBOL);
-	}
-	refresh();
-	return 0;
-}
-
 int display(std::vector<Object> objects, size_t t) {
   clear();
   for (size_t i = 0; i < objects.size(); i++) {
@@ -78,14 +46,29 @@ int display(std::vector<Object> objects, size_t t) {
   return 0;
 }
 
-Coordinate no_speed(int t) {
-  (void) t;
-  return Coordinate(t, 0);
+std::vector<Object> update(std::vector<Object> objects, int ch) {
+  Object player = objects[0];
+  switch (ch) {
+    case 'w':
+      player.y--;
+      break;
+    case 's':
+      player.y++;
+      break;
+    case 'a':
+      player.x--;
+      break;
+    case 'd':
+      player.x++;
+      break;
+  }
+  objects[0] = player;
+  return objects;
 }
 
 int main(void) {
   std::vector<Object> objects;
-  objects.push_back(Object(10, 10, [](int t) { return Coordinate(t, 0); }));
+  objects.push_back(Object(10, 10, [](int t) { (void)t; return Coordinate(0, 0); }));
 
 //   Coordinate player(0, 0);
 //   std::vector<Coordinate> enemies;
@@ -94,12 +77,11 @@ int main(void) {
   initscr();
   size_t t = 0;
   while (1) {
-    // int ch = getch();
-    // if (ch == 'q') {
-    //   break;
-    // }
-
-    // update(player, ch);
+    int ch = getch();
+    if (ch == 'q') {
+      break;
+    }
+    objects = update(objects, ch);
 	// if (collide(player, enemies))
 	// 	return game_over();
 	// else
