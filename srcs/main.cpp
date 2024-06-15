@@ -84,7 +84,7 @@ std::vector<Object> update(std::vector<Object> objects, int ch, int t) {
       player.x++;
       break;
     case ' ':
-      objects.push_back(Object(player.x, player.y, t, [](int t) { (void)t; return Coordinate(t, 0); }, 'o'));
+      objects.push_back(Object(player.x + 1, player.y, t, [](int t) { (void)t; return Coordinate(t, 0); }, 'o'));
       break;
   }
   objects[0] = player;
