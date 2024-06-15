@@ -1,5 +1,9 @@
 #include <ncurses.h>
 #include <stdio.h>
+#include <vector>
+
+#define PLAYER_SYMBOL "(^_^)"
+#define ENEMY_SYMBOL "(X_X)"
 
 struct Coordinate {
     public:
@@ -11,7 +15,7 @@ struct Coordinate {
     }
 };
 
-Coordinate update(Coordinate player, int ch) {
+Coordinate update(Coordinate player, std::vector<Coordinate> enemies, int ch) {
   switch (ch) {
     case 'w':
       player.y--;
@@ -27,20 +31,26 @@ Coordinate update(Coordinate player, int ch) {
       break;
   }
   clear();
-  mvprintw(player.y, player.x, "P");
+  mvprintw(player.y, player.x, PLAYER_SYMBOL);
+  for (size_t i = 0; i < enemies.size(); i++) {
+	mvprintw(enemies[i].y, enemies[i].x, ENEMY_SYMBOL);
+  }
   refresh();
   return player;
 }
 
 int main(void) {
   Coordinate player(0, 0);
+  std::vector<Coordinate> enemies;
+  enemies.push_back(Coordinate(10, 10));
+  enemies.push_back(Coordinate(20, 20));
   initscr();
   while (1) {
     int ch = getch();
     if (ch == 'q') {
       break;
     }
-    player = update(player, ch);
+    player = update(player, enemies, ch);
   }
   endwin();
 }
