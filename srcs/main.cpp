@@ -58,6 +58,9 @@ std::vector<Object> collision(std::vector<Object> objects, size_t t) {
 			}
 			else if (objects[i].symbol == ENEMY_SYMBOL && objects[j].symbol == BULLET_SYMBOL) {
 				objects.erase(objects.begin() + i);
+				objects.erase(objects.begin() + j - 1);
+				i--;
+				j = -2;
 			}
 		}
 	}
