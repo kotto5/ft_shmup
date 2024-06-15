@@ -3,6 +3,12 @@
 
 #include <functional>
 #include "Coordinate.hpp"
+#include <vector>
+
+#define PLAYER_SYMBOL 'P'
+#define ENEMY_SYMBOL 'X'
+#define BULLET_SYMBOL 'o'
+#define ENEMY_BULLET_SYMBOL 'u'
 
 struct Object
 {
@@ -25,6 +31,7 @@ struct Object
 		Coordinate s = speed(t - t0);
 		return Coordinate(x + s.x, y + s.y);
 	}
+	virtual std::vector<Object *> update(int ch, int t) = 0;
 };
 
 #endif

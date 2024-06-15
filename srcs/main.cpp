@@ -6,13 +6,8 @@
 #include "Coordinate.hpp"
 #include "Object.hpp"
 #include <tuple>
-
-// #define PLAYER_SYMBOL "(^_^)"
-// #define ENEMY_SYMBOL "(X_X)"
-
-#define PLAYER_SYMBOL 'P'
-#define ENEMY_SYMBOL 'X'
-#define BULLET_SYMBOL 'o'
+#include "Player.hpp"
+#include "Enemy.hpp"
 
 #define FLAME_RATE 100000
 
@@ -26,6 +21,7 @@ int	game_over() {
 		int ch = getch();
 		if (ch == 'q') {
 			endwin();
+			exit(0);
 			return 0;
 		}
 		else if (ch == 'n')
@@ -33,11 +29,11 @@ int	game_over() {
 	}
 }
 
-int display(std::vector<Object> objects, int score, size_t t) {
+int display(std::vector<Object *> objects, int score, size_t t) {
   clear();
   for (size_t i = 0; i < objects.size(); i++) {
-	Coordinate c = objects[i].get_coordinate(t);
-	char synbol = objects[i].get_symbol();
+	Coordinate c = objects[i]->get_coordinate(t);
+	char synbol = objects[i]->get_symbol();
 	char tmp[2] = {synbol, '\0'};
 	mvprintw(c.y, c.x, tmp);
   }
@@ -61,7 +57,7 @@ int display(std::vector<Object> objects, int score, size_t t) {
   return 0;
 }
 
-std::tuple<std::vector<Object>, int> collision(std::vector<Object> objects, size_t t) {
+std::tuple<std::vector<Object *>, int> collision(std::vector<Object *> objects, size_t t) {
   // player vs enemy: player dies
   // enemy vs bullet(player): enemy dies
   // player vs bullet(enemy): player dies
@@ -71,16 +67,19 @@ std::tuple<std::vector<Object>, int> collision(std::vector<Object> objects, size
 
   for (size_t i = 0; i < objects.size(); i++) {
 	for (size_t j = i + 1; j < objects.size(); j++) {
-		if (objects[i].get_coordinate(t) == objects[j].get_coordinate(t)) {
-			if (objects[i].symbol == PLAYER_SYMBOL && objects[j].symbol == ENEMY_SYMBOL) {
+		if (objects[i]->get_coordinate(t) == objects[j]->get_coordinate(t)) {
+			if (objects[i]->symbol == PLAYER_SYMBOL && objects[j]->symbol == ENEMY_SYMBOL) {
 				game_over();
 			}
-			else if (objects[i].symbol == ENEMY_SYMBOL && objects[j].symbol == BULLET_SYMBOL) {
-        gained_score += 100;
+			else if (objects[i]->symbol == ENEMY_SYMBOL && objects[j]->symbol == BULLET_SYMBOL) {
+        		gained_score += 100;
 				objects.erase(objects.begin() + i);
 				objects.erase(objects.begin() + j - 1);
 				i--;
 				j = -2;
+			}
+			else if (objects[i]->symbol == PLAYER_SYMBOL && objects[j]->symbol == ENEMY_BULLET_SYMBOL) {
+				game_over();
 			}
 		}
 	}
@@ -88,38 +87,12 @@ std::tuple<std::vector<Object>, int> collision(std::vector<Object> objects, size
   return make_tuple(objects, gained_score);
 }
 
-std::vector<Object> update(std::vector<Object> objects, int ch, int t) {
-  Object player = objects[0];
-  int x, y;
-  getmaxyx(stdscr, y, x);
-  switch (ch) {
-    case 'w':
-      player.y == 1 ? player.y = 1 : player.y--;
-      break;
-    case 's':
-	  player.y == y - 3 ? player.y = y - 3 : player.y++;
-      break;
-    case 'a':
-	  player.x == 1 ? player.x = 1 : player.x--;
-      break;
-    case 'd':
-	  player.x == x - 2 ? player.x = x - 2 : player.x++;
-      break;
-    case ' ':
-      objects.push_back(Object(player.x + 1, player.y, t, [](int t) { (void)t; return Coordinate(t, 0); }, 'o'));
-      break;
-  }
-  objects[0] = player;
-  return objects;
-}
-
-
 int main(void) {
-  std::vector<Object> objects;
+  std::vector<Object *> objects;
   size_t t = 0;
-  objects.push_back(Object(10, 10, t, [](int t) { (void)t; return Coordinate(0, 0); }, 'P'));
+  objects.push_back(new Player(10, 10, t, [](int t) { (void)t; return Coordinate(0, 0); }, 'P'));
   //enemy
-  objects.push_back(Object(20, 10, t, [](int t) { (void)t; return Coordinate(0, 0); }, 'X'));
+  objects.push_back(new Enemy(20, 10, t, [](int t) { (void)t; return Coordinate(0, 0); }, 'X'));
   int score = 0;
   initscr();
   timeout(1);
@@ -128,7 +101,16 @@ int main(void) {
     if (ch == 'q') {
       break;
     }
-    objects = update(objects, ch, t);
+	std::vector<Object *> new_objects;
+	for (size_t i = 0; i < objects.size(); i++) {
+		std::vector<Object *> tmp = objects[i]->update(ch, t);
+		for (size_t j = 0; j < tmp.size(); j++) {
+			new_objects.push_back(tmp[j]);
+		}
+	}
+	for (size_t i = 0; i < new_objects.size(); i++) {
+		objects.push_back(new_objects[i]);
+	}
     auto [new_objs, new_score] = collision(objects, t);
     objects = new_objs;
     score += new_score;
