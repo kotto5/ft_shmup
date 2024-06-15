@@ -1,4 +1,4 @@
-NAME	=	pretty_shmup
+NAME	=	ft_shmup
 
 # a variable SRCS contain any files in srcs with *.cpp directory
 SRCS	=	$(wildcard srcs/*.cpp)
