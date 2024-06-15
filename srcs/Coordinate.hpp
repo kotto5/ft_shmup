@@ -9,6 +9,9 @@ struct Coordinate {
     this->x = x;
     this->y = y;
     }
+	bool operator==(const Coordinate &rhs) const {
+		return x == rhs.x && y == rhs.y;
+	}
 };
 
 #endif
