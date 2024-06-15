@@ -34,13 +34,13 @@ int	game_over() {
 	}
 }
 
-int display(std::vector<Object *> objects, int score, size_t t, int frequency = 8) {
+int display(std::vector<Object *> objects, int score, size_t t) {
   clear();
   for (size_t i = 0; i < objects.size(); i++) {
     Coordinate c = objects[i]->get_coordinate(t);
     char synbol = objects[i]->get_symbol();
     char tmp[2] = {synbol, '\0'};
-    mvprintw(c.y, c.x - (t / frequency), tmp);
+    mvprintw(c.y, c.x, tmp); // no camera move temporary
   }
   int  x, y, w, h;
   x = 0;
