@@ -10,7 +10,11 @@
 #include "Enemy.hpp"
 #include <stdlib.h>
 
-#define FLAME_RATE 100000
+#include <chrono>
+#include <ctime>
+#include <stdlib.h>
+
+#define FLAME_RATE 10
 
 int	main(void);
 
@@ -30,13 +34,13 @@ int	game_over() {
 	}
 }
 
-int display(std::vector<Object *> objects, int score, size_t t) {
+int display(std::vector<Object *> objects, int score, size_t t, int frequency = 8) {
   clear();
   for (size_t i = 0; i < objects.size(); i++) {
-	Coordinate c = objects[i]->get_coordinate(t);
-	char synbol = objects[i]->get_symbol();
-	char tmp[2] = {synbol, '\0'};
-	mvprintw(c.y, c.x - (t / 2), tmp);
+    Coordinate c = objects[i]->get_coordinate(t);
+    char synbol = objects[i]->get_symbol();
+    char tmp[2] = {synbol, '\0'};
+    mvprintw(c.y, c.x - (t / frequency), tmp);
   }
   int  x, y, w, h;
   x = 0;
@@ -88,37 +92,52 @@ std::tuple<std::vector<Object *>, int> collision(std::vector<Object *> objects, 
   return make_tuple(objects, gained_score);
 }
 
+int64_t datetime_millisec() {
+  auto now = std::chrono::system_clock::now();
+  auto duration = now.time_since_epoch();
+  return std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+}
+
 int main(void) {
   std::vector<Object *> objects;
-  size_t t = 0;
-  objects.push_back(new Player(10, 10, t, [](int t) { (void)t; return Coordinate(0, 0); }, 'P'));
-  //enemy
-  objects.push_back(new Enemy(20, 10, t, [](int t) { (void)t; return Coordinate(0, 0); }, 'X'));
+  size_t frame_tick = 0; // increment every 100ms
+
+  // player spawn
+  objects.push_back(new Player(10, 10, frame_tick, [](int t) { (void)t; return Coordinate(0, 0); }, 'P'));
+  //enemy (tmp)
+  objects.push_back(new Enemy(20, 10, frame_tick, [](int t) { (void)t; return Coordinate(0, 0); }, 'X'));
   int score = 0;
   initscr();
-  noecho(); //キーが入力されても表示しない
-  curs_set(0);//カーソルを非表示
-  timeout(1);
+  noecho(); // キーが入力されても表示しない
+  curs_set(0);// カーソルを非表示
+  timeout(50);
+  auto now_time = datetime_millisec();
   while (1) {
     int ch = getch();
     if (ch == 'q') {
       break;
     }
-	std::vector<Object *> new_objects;
-	for (size_t i = 0; i < objects.size(); i++) {
-		std::vector<Object *> tmp = objects[i]->update(ch, t);
-		for (size_t j = 0; j < tmp.size(); j++) {
-			new_objects.push_back(tmp[j]);
-		}
-	}
-	for (size_t i = 0; i < new_objects.size(); i++) {
-		objects.push_back(new_objects[i]);
-	}
-    auto [new_objs, new_score] = collision(objects, t);
+    // update all objects
+    std::vector<Object *> new_objects; // == []
+    for (size_t i = 0; i < objects.size(); i++) {
+      std::vector<Object *> tmp = objects[i]->update(ch, frame_tick);
+      for (size_t j = 0; j < tmp.size(); j++) {
+        new_objects.push_back(tmp[j]);
+      }
+    }
+    // merge new_objects to objects
+    for (size_t i = 0; i < new_objects.size(); i++) {
+      objects.push_back(new_objects[i]);
+    }
+    // check collision
+    auto [new_objs, new_score] = collision(objects, frame_tick);
     objects = new_objs;
     score += new_score;
-    display(objects, score, t);
-    usleep(FLAME_RATE);
-    t++;
+    // display all objects
+    display(objects, score, frame_tick);
+    if (datetime_millisec() - now_time > 1 / FLAME_RATE * 1000) {
+      now_time = datetime_millisec();
+      frame_tick ++;
+    }
   }
 }

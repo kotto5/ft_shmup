@@ -12,7 +12,10 @@ public:
 	std::vector<Object *> update(int ch, int t) {
 		int width, height;
 		getmaxyx(stdscr, height, width);
-		int left_bound = 1 + (t / 2);
+		// t の原則処理 frame_tick -> game_tick
+		int left_bound = t + 2;
+		int right_bound = left_bound + width - 1;
+
 		std::vector<Object *> objects;
 		if (ch == 'w') {
 			this->y == 1 ? this->y = 1 : this->y--;	
@@ -21,17 +24,17 @@ public:
 			this->y == height - 3 ? this->y = height - 3 : this->y++;
 		}
 		else if (ch == 'a') {
-			this->x == left_bound + 1 ? left_bound + 2: this->x--;
+			this->x == left_bound ? this->x == left_bound : this->x--;
 		}
 		else if (ch == 'd') {
-			this->x == width - 2  ? this->x = width - 2 : this->x++;
+			this->x == right_bound  ? this->x = right_bound : this->x++;
 		}
 		else if (ch == ' ') {
-			objects.push_back(new Bullet(x, y, t, [](int t) { return Coordinate(t, 0); }, BULLET_SYMBOL));
+			objects.push_back(new Bullet(x, y, t, [](int t) { return Coordinate(t, 0); }, BULLET_SYMBOL, 1));
 		}
-		else {
-			this->x == left_bound + 1 ? left_bound + 2: this->x--;
-		}
+		// else {
+		// 	this->x == left_bound + 1 ? left_bound + 2: this->x--;
+		// }
 		return objects;
 	}
 };

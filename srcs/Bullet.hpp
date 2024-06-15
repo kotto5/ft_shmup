@@ -7,7 +7,7 @@
 class Bullet : public Object
 {
 public:
-	Bullet(int x, int y, int t0, std::function<Coordinate(int)> speed, char symbol) : Object(x, y, t0, speed, symbol) {}
+	Bullet(int x, int y, int t0, std::function<Coordinate(int)> speed, char symbol, int frequency = 1) : Object(x, y, t0, speed, symbol, frequency) {}
 	std::vector<Object *> update(int ch, int t) {
 		(void)ch;
 		(void)t;

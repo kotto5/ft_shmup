@@ -12,7 +12,7 @@ public:
 		(void)ch;
 		(void)t;
 		std::vector<Object *> objects;
-		if (t % 5 == 0)
+		if (t % 10 == 5)
 			objects.push_back(new EnemyBullet(x - 1, y, t, [](int t) { return Coordinate(-t, 0); }, ENEMY_BULLET_SYMBOL));
 		return objects;
 	}
