@@ -33,9 +33,6 @@ public:
 		else if (ch == ' ') {
 			objects.push_back(new Bullet(x - t / frequency, y, t, [](int t) { return Coordinate(t, 0); }, BULLET_SYMBOL, 1));
 		}
-		// else {
-		// 	this->x == left_bound + 1 ? left_bound + 2: this->x--;
-		// }
 		return objects;
 	}
 };

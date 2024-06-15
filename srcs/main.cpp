@@ -57,7 +57,7 @@ int display(std::vector<Object *> objects, int score, size_t t) {
     x = 0;
     
   }
-  mvprintw(h - 1, 0, "Score: %d", score);
+  mvprintw(h - 1, 0, "Score: %d\tTotal Objects: %d", score, objects.size());
   refresh();
   return 0;
 }
@@ -90,6 +90,22 @@ std::tuple<std::vector<Object *>, int> collision(std::vector<Object *> objects, 
 	}
   }
   return make_tuple(objects, gained_score);
+}
+
+/// @brief objectsを引数にとり、get_coordinateの情報を基に、不要なインスタンスを削除する
+/// @param objects 削除判定前のobjects
+/// @param t 
+/// @return 不要なインスタンスが削除された状態のobjectsを返す
+std::vector<Object *> clean_up(std::vector<Object *> objects, size_t t) {
+  int  width, height;
+  getmaxyx(stdscr, height, width);
+  for (ssize_t i = objects.size() - 1; i >= 0; i--) {
+    Coordinate c = objects[i]->get_coordinate(t);
+    if (c.y < 0 || c.y >= height || c.x < 0 || c.x >= width) {
+      objects.erase(objects.begin() + i);
+    }    
+  }
+  return objects;
 }
 
 int64_t datetime_millisec() {
@@ -135,6 +151,8 @@ int main(void) {
     score += new_score;
     // display all objects
     display(objects, score, frame_tick);
+    // clean up
+    objects = clean_up(objects, frame_tick);
     if (datetime_millisec() - now_time > 1 / FLAME_RATE * 1000) {
       now_time = datetime_millisec();
       frame_tick ++;

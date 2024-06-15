@@ -30,10 +30,10 @@ struct Object
 		return symbol;
 	}
 	Coordinate get_coordinate(int t) {
-		Coordinate s = speed(t / frequency - t0); // speed は正の方向性のみ定義：speed が2 * tの関数の時、1マス飛ばしで出現する弾丸になる。
+		Coordinate s = speed(t / frequency - t0); // speed が2 * tの関数の時、1マス飛ばしで出現する弾丸になる。
 		return Coordinate(x + s.x, y + s.y);
 	}
-	virtual std::vector<Object *> update(int ch, int t) = 0;
+	virtual std::vector<Object *> update(int ch, int t) = 0; // return new objects created by this object
 };
 
 #endif
