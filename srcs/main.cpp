@@ -35,7 +35,7 @@ int display(std::vector<Object *> objects, int score, size_t t) {
 	Coordinate c = objects[i]->get_coordinate(t);
 	char synbol = objects[i]->get_symbol();
 	char tmp[2] = {synbol, '\0'};
-	mvprintw(c.y, c.x, tmp);
+	mvprintw(c.y, c.x - (t / 2), tmp);
   }
   int  x, y, w, h;
   x = 0;

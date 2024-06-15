@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "Object.hpp"
-#include "Ballet.hpp"
+#include "Bullet.hpp"
 
 class Player : public Object
 {
@@ -12,6 +12,7 @@ public:
 	std::vector<Object *> update(int ch, int t) {
 		int width, height;
 		getmaxyx(stdscr, height, width);
+		int left_bound = 1 + (t / 2);
 		std::vector<Object *> objects;
 		if (ch == 'w') {
 			this->y == 1 ? this->y = 1 : this->y--;	
@@ -20,13 +21,16 @@ public:
 			this->y == height - 3 ? this->y = height - 3 : this->y++;
 		}
 		else if (ch == 'a') {
-			this->x == 1 ? this->x = 1 : this->x--;
+			this->x == left_bound + 1 ? left_bound + 2: this->x--;
 		}
 		else if (ch == 'd') {
-			this->x == width - 2 ? this->x = width - 2 : this->x++;
+			this->x == width - 2  ? this->x = width - 2 : this->x++;
 		}
 		else if (ch == ' ') {
-			objects.push_back(new Ballet(x, y, t, [](int t) { return Coordinate(t, 0); }, BULLET_SYMBOL));
+			objects.push_back(new Bullet(x, y, t, [](int t) { return Coordinate(t, 0); }, BULLET_SYMBOL));
+		}
+		else {
+			this->x == left_bound + 1 ? left_bound + 2: this->x--;
 		}
 		return objects;
 	}
