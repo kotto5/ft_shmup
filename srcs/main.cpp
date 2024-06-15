@@ -40,13 +40,15 @@ int display(std::vector<Object> objects, size_t t) {
   clear();
   for (size_t i = 0; i < objects.size(); i++) {
 	Coordinate c = objects[i].get_coordinate(t);
-	mvprintw(c.y, c.x, PLAYER_SYMBOL);
+	char synbol = objects[i].get_symbol();
+	char tmp[2] = {synbol, '\0'};
+	mvprintw(c.y, c.x, tmp);
   }
   refresh();
   return 0;
 }
 
-std::vector<Object> update(std::vector<Object> objects, int ch) {
+std::vector<Object> update(std::vector<Object> objects, int ch, int t) {
   Object player = objects[0];
   switch (ch) {
     case 'w':
@@ -61,6 +63,8 @@ std::vector<Object> update(std::vector<Object> objects, int ch) {
     case 'd':
       player.x++;
       break;
+	case ' ':
+	  objects.push_back(Object(player.x, player.y, t, [](int t) { (void)t; return Coordinate(t, 0); }, 'o'));
   }
   objects[0] = player;
   return objects;
@@ -68,20 +72,19 @@ std::vector<Object> update(std::vector<Object> objects, int ch) {
 
 int main(void) {
   std::vector<Object> objects;
-  objects.push_back(Object(10, 10, [](int t) { (void)t; return Coordinate(0, 0); }));
-
-//   Coordinate player(0, 0);
-//   std::vector<Coordinate> enemies;
-//   enemies.push_back(Coordinate(10, 10));
-//   enemies.push_back(Coordinate(20, 20)); 
-  initscr();
   size_t t = 0;
+  objects.push_back(Object(10, 10, t, [](int t) { (void)t; return Coordinate(0, 0); }, 'P'));
+  //enemy
+  objects.push_back(Object(20, 10, t, [](int t) { (void)t; return Coordinate(0, 0); }, 'X'));
+
+  initscr();
+  timeout(1);
   while (1) {
     int ch = getch();
     if (ch == 'q') {
       break;
     }
-    objects = update(objects, ch);
+    objects = update(objects, ch, t);
 	// if (collide(player, enemies))
 	// 	return game_over();
 	// else
