@@ -128,6 +128,17 @@ char  get_input() {
   }
   return ch;
 }
+
+std::vector<Object *> spawn(size_t t) {
+  std::vector<Object *> objects;
+  int  width, height;
+  getmaxyx(stdscr, height, width);
+  if (t % SPAWN_PER_TICK == 0 && rand() % 100 <= SPAWN_RATE){
+    objects.push_back(new Enemy(width - 2, rand() % height - 1, t, [](int t) {return Coordinate(-t, 0); }, 'X'));
+  }
+  return objects;
+}
+
 size_t get_tick() {
   static size_t tick = 0;
   static int64_t last_time = datetime_millisec();
@@ -159,12 +170,7 @@ int main(void) {
       break;
     }
     size_t frame_tick = get_tick();
-    // spawning
-    int  width, height;
-    getmaxyx(stdscr, height, width);
-    if (frame_tick % SPAWN_PER_TICK == 0 && rand() % 100 <= SPAWN_RATE){
-      objects.push_back(new Enemy(width - 2, rand() % height - 1, frame_tick, [](int t) {return Coordinate(-t, 0); }, 'X'));
-    }
+    std::vector<Object *> new_spawn = spawn(frame_tick);
 
     // update all objects
     std::vector<Object *> new_objects; // == []
