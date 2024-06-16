@@ -167,7 +167,7 @@ std::vector<Object *> spawn(size_t tic) {
   if (tic % SPAWN_PER_TICK == 0 && rand() % 100 <= SPAWN_RATE){ // block spawn
     int block_width = rand() % 5 + 1;
     int block_height = rand() % 5 + 1;
-    objects.push_back(new Block(width - 2 - block_height, rand() % height - 3 - block_height, tic, [](int t) {return Coordinate(-t, 0); }, '#', block_width, block_height));
+    objects.push_back(new Block(tic + width - 2 - block_height, rand() % height - 3 - block_height, tic, [](int t) {return Coordinate(-t, 0); }, '#', block_width, block_height));
   }
   return objects;
 }
