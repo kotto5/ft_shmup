@@ -20,7 +20,7 @@
 #define SPAWN_RATE 30
 #define SPAWN_PER_TICK 15
 
-int	main(void);
+// int	main(void);
 
 void center_print(const char *str, int y) {
   int w = getmaxx(stdscr);
@@ -33,7 +33,7 @@ int	game_over() {
   int h = getmaxy(stdscr);
   center_print("Game Over", h / 2);
   center_print("If you want to quit press 'q'.", h / 2 + 3);
-  center_print("If you want to play again press 'n'.", h / 2 + 4);
+  // center_print("If you want to play again press 'n'.", h / 2 + 4);
 	refresh();
 	while (1) {
 		int ch = getch();
@@ -42,8 +42,8 @@ int	game_over() {
 			exit(0);
 			return 0;
 		}
-		else if (ch == 'n')
-			return main();
+		// else if (ch == 'n')
+		// 	return main();
 	}
 }
 
