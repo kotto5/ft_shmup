@@ -5,10 +5,13 @@
 #include "Coordinate.hpp"
 #include <vector>
 
+#include<string>
+
 #define PLAYER_SYMBOL 'P'
 #define ENEMY_SYMBOL 'X'
 #define BULLET_SYMBOL 'o'
 #define ENEMY_BULLET_SYMBOL '*'
+#define BLOCK_SYMBOL '#'
 
 struct Object
 {
@@ -16,15 +19,21 @@ struct Object
 	int y;
 	int t0;
 	char symbol;
+	std::string tag;
+
 	size_t frequency;
 	std::function<Coordinate(int)> speed;
-	Object(int x, int y, int t0, std::function<Coordinate(int)> speed, char symbol, int frequency = 4) {
+	Object(int x, int y, int t0, std::function<Coordinate(int)> speed, char symbol, int frequency = 4, std::string tag = "") {
 		this->x = x;
 		this->y = y;
 		this->t0 = t0;
 		this->speed = speed;
 		this->symbol = symbol;
 		this->frequency = frequency;
+		this->tag = tag;
+	}
+	std::string get_tag() {
+		return tag;
 	}
 	char get_symbol() {
 		return symbol;

@@ -8,6 +8,7 @@
 #include <tuple>
 #include "Player.hpp"
 #include "Enemy.hpp"
+#include "Block.hpp"
 #include <stdlib.h>
 #include <string.h>
 #include <chrono>
@@ -49,10 +50,22 @@ int	game_over() {
 int display(std::vector<Object *> objects, int score, size_t t) {
   clear();
   for (size_t i = 0; i < objects.size(); i++) {
-    Coordinate c = objects[i]->get_coordinate(t);
     char synbol = objects[i]->get_symbol();
-    char tmp[2] = {synbol, '\0'};
-    mvprintw(c.y, c.x, tmp); // no camera move
+    if (objects[i]->get_tag() == "block") {
+      Block *block = dynamic_cast<Block *>(objects[i]);
+      Coordinate c = block->get_coordinate(t);
+      for (int w = 0; w < block->width; w++) {
+        for (int h = 0; h < block->height; h++) {
+          char tmp[2] = {synbol, '\0'};
+          mvprintw(c.y + h, c.x + w, tmp);
+        }
+      }
+    }
+    else {
+      Coordinate c = objects[i]->get_coordinate(t);
+      char tmp[2] = {synbol, '\0'};
+      mvprintw(c.y, c.x, tmp); // no camera move
+    }
   }
   int  x, y, w, h;
   x = 0;
@@ -77,23 +90,32 @@ std::tuple<std::vector<Object *>, int> collision(std::vector<Object *> objects, 
   int gained_score = 0;
 
   for (size_t i = 0; i < objects.size(); i++) {
-	for (size_t j = i + 1; j < objects.size(); j++) {
-		if (objects[i]->get_coordinate(t) == objects[j]->get_coordinate(t)) {
-			if (!UNBEATABLE && objects[i]->symbol == PLAYER_SYMBOL && objects[j]->symbol == ENEMY_SYMBOL) {
-				game_over();
-			}
-			else if (objects[i]->symbol == ENEMY_SYMBOL && objects[j]->symbol == BULLET_SYMBOL) {
-        		gained_score += 100;
-				objects.erase(objects.begin() + i);
-				objects.erase(objects.begin() + j - 1);
-				i--;
-				j = -2;
-			}
-			else if (!UNBEATABLE && objects[i]->symbol == PLAYER_SYMBOL && objects[j]->symbol == ENEMY_BULLET_SYMBOL) {
-				game_over();
-			}
-		}
-	}
+    for (size_t j = i + 1; j < objects.size(); j++) {
+      if (!UNBEATABLE && objects[i]->symbol == PLAYER_SYMBOL && objects[j]->get_tag() == "block") {
+        Block *block = dynamic_cast<Block *>(objects[j]);
+        Coordinate c = block->get_coordinate(t);
+        Coordinate player_coordinate = objects[i]->get_coordinate(t);
+        if (player_coordinate.x >= c.x && player_coordinate.x <= c.x + block->width
+          && player_coordinate.y >= c.y && player_coordinate.y <= c.y + block->height) {
+          game_over();
+        }
+      }
+      else if (objects[i]->get_coordinate(t) == objects[j]->get_coordinate(t)){
+        if (!UNBEATABLE && objects[i]->symbol == PLAYER_SYMBOL && objects[j]->symbol == ENEMY_SYMBOL) {
+          game_over();
+        }
+        else if (objects[i]->symbol == ENEMY_SYMBOL && objects[j]->symbol == BULLET_SYMBOL) {
+              gained_score += 100;
+          objects.erase(objects.begin() + i);
+          objects.erase(objects.begin() + j - 1);
+          i--;
+          j = -2;
+        }
+        else if (!UNBEATABLE && objects[i]->symbol == PLAYER_SYMBOL && objects[j]->symbol == ENEMY_BULLET_SYMBOL) {
+          game_over();
+        }
+      }
+    }
   }
   return make_tuple(objects, gained_score);
 }
@@ -142,8 +164,13 @@ int main(void) {
     // spawning
     int  width, height;
     getmaxyx(stdscr, height, width);
-    if (frame_tick % SPAWN_PER_TICK == 0 && rand() % 100 <= SPAWN_RATE){
+    if (frame_tick % SPAWN_PER_TICK == 0 && rand() % 100 <= SPAWN_RATE){ // enemy spawn
       objects.push_back(new Enemy(width - 2, rand() % height - 1, frame_tick, [](int t) {return Coordinate(-t, 0); }, 'X'));
+    }
+    if (frame_tick % SPAWN_PER_TICK == 0 && rand() % 100 <= SPAWN_RATE){ // block spawn
+      int block_width = rand() % 5 + 1;
+      int block_height = rand() % 5 + 1;
+      objects.push_back(new Block(width - 2 - block_height, rand() % height - 3 - block_height, frame_tick, [](int t) {return Coordinate(-t, 0); }, '#', block_width, block_height));
     }
 
     // update all objects
