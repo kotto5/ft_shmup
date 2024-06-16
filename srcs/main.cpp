@@ -8,6 +8,7 @@
 #include <tuple>
 #include "Player.hpp"
 #include "Enemy.hpp"
+#include "Block.hpp"
 #include <stdlib.h>
 #include <string.h>
 #include <chrono>
@@ -19,7 +20,7 @@
 #define SPAWN_RATE 30
 #define SPAWN_PER_TICK 15
 
-int	main(void);
+// int	main(void);
 
 void center_print(const char *str, int y) {
   int w = getmaxx(stdscr);
@@ -32,7 +33,7 @@ int	game_over() {
   int h = getmaxy(stdscr);
   center_print("Game Over", h / 2);
   center_print("If you want to quit press 'q'.", h / 2 + 3);
-  center_print("If you want to play again press 'n'.", h / 2 + 4);
+  // center_print("If you want to play again press 'n'.", h / 2 + 4);
 	refresh();
 	while (1) {
 		int ch = getch();
@@ -41,8 +42,8 @@ int	game_over() {
 			exit(0);
 			return 0;
 		}
-		else if (ch == 'n')
-			return main();
+		// else if (ch == 'n')
+		// 	return main();
 	}
 }
 
@@ -50,13 +51,26 @@ int display(std::vector<Object *> objects, int score, size_t t) {
   clear();
   Coordinate player_c(1, 1);
   for (size_t i = 0; i < objects.size(); i++) {
-    Coordinate c = objects[i]->get_coordinate(t);
-    if (objects[i]->get_symbol() == PLAYER_SYMBOL) {
-      player_c = c;
-    }
     char synbol = objects[i]->get_symbol();
-    char tmp[2] = {synbol, '\0'};
-    mvprintw(c.y, c.x - t, tmp); // no camera move
+    if (objects[i]->get_tag() == "block") {
+      Block *block = dynamic_cast<Block *>(objects[i]);
+      Coordinate c = block->get_coordinate(t);
+      for (int w = 0; w < block->width; w++) {
+        for (int h = 0; h < block->height; h++) {
+          char tmp[2] = {synbol, '\0'};
+          mvprintw(c.y + h, c.x + w, tmp);
+        }
+      }
+    }
+    else {
+      Coordinate c = objects[i]->get_coordinate(t);
+      if (objects[i]->get_symbol() == PLAYER_SYMBOL) {
+        player_c = c;
+      }
+      char synbol = objects[i]->get_symbol();
+      char tmp[2] = {synbol, '\0'};
+      mvprintw(c.y, c.x - t, tmp); // no camera move
+    }
   }
   int  x, y, w, h;
   x = 0;
@@ -82,23 +96,32 @@ std::tuple<std::vector<Object *>, int> collision(std::vector<Object *> objects, 
   int gained_score = 0;
 
   for (size_t i = 0; i < objects.size(); i++) {
-	for (size_t j = i + 1; j < objects.size(); j++) {
-		if (objects[i]->get_coordinate(t) == objects[j]->get_coordinate(t)) {
-			if (!UNBEATABLE && objects[i]->symbol == PLAYER_SYMBOL && objects[j]->symbol == ENEMY_SYMBOL) {
-				game_over();
-			}
-			else if (objects[i]->symbol == ENEMY_SYMBOL && objects[j]->symbol == BULLET_SYMBOL) {
-        		gained_score += 100;
-				objects.erase(objects.begin() + i);
-				objects.erase(objects.begin() + j - 1);
-				i--;
-				j = -2;
-			}
-			else if (!UNBEATABLE && objects[i]->symbol == PLAYER_SYMBOL && objects[j]->symbol == ENEMY_BULLET_SYMBOL) {
-				game_over();
-			}
-		}
-	}
+    for (size_t j = i + 1; j < objects.size(); j++) {
+      if (!UNBEATABLE && objects[i]->symbol == PLAYER_SYMBOL && objects[j]->get_tag() == "block") {
+        Block *block = dynamic_cast<Block *>(objects[j]);
+        Coordinate c = block->get_coordinate(t);
+        Coordinate player_coordinate = objects[i]->get_coordinate(t);
+        if (player_coordinate.x >= c.x && player_coordinate.x <= c.x + block->width
+          && player_coordinate.y >= c.y && player_coordinate.y <= c.y + block->height) {
+          game_over();
+        }
+      }
+      else if (objects[i]->get_coordinate(t) == objects[j]->get_coordinate(t)){
+        if (!UNBEATABLE && objects[i]->symbol == PLAYER_SYMBOL && objects[j]->symbol == ENEMY_SYMBOL) {
+          game_over();
+        }
+        else if (objects[i]->symbol == ENEMY_SYMBOL && objects[j]->symbol == BULLET_SYMBOL) {
+              gained_score += 100;
+          objects.erase(objects.begin() + i);
+          objects.erase(objects.begin() + j - 1);
+          i--;
+          j = -2;
+        }
+        else if (!UNBEATABLE && objects[i]->symbol == PLAYER_SYMBOL && objects[j]->symbol == ENEMY_BULLET_SYMBOL) {
+          game_over();
+        }
+      }
+    }
   }
   return make_tuple(objects, gained_score);
 }
@@ -140,6 +163,11 @@ std::vector<Object *> spawn(size_t t) {
   getmaxyx(stdscr, height, width);
   if (t % SPAWN_PER_TICK == 0 && rand() % 100 <= SPAWN_RATE){
     objects.push_back(new Enemy(t + width - 2, rand() % height - 1, t, [](int t) {return Coordinate(-t, 0); }, 'X'));
+  }
+  if (frame_tick % SPAWN_PER_TICK == 0 && rand() % 100 <= SPAWN_RATE){ // block spawn
+    int block_width = rand() % 5 + 1;
+    int block_height = rand() % 5 + 1;
+    objects.push_back(new Block(width - 2 - block_height, rand() % height - 3 - block_height, frame_tick, [](int t) {return Coordinate(-t, 0); }, '#', block_width, block_height));
   }
   return objects;
 }
@@ -190,7 +218,6 @@ int main(void) {
 
     objects = update_status_and_produce_objects(objects, ch, frame_tick);
     add_list_to_list(objects, spawn(frame_tick));
-
     auto [new_objs, new_score] = collision(objects, frame_tick);
     objects = new_objs;
     score += new_score;
