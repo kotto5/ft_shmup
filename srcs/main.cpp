@@ -14,23 +14,22 @@
 #include <ctime>
 #include <stdlib.h>
 
+#define UNBEATABLE false
 #define FLAME_RATE 10
+#define SPAWN_RATE 30
+#define SPAWN_PER_TICK 15
 
 int	main(void);
 
 void center_print(const char *str, int y) {
-  int x, w, h;
-  getmaxyx(stdscr, h, w);
-  (void) h;
-  x = (w - strlen(str)) / 2;
+  int w = getmaxx(stdscr);
+  int x = (w - strlen(str)) / 2;
   mvprintw(y, x, str);
 }
 
 int	game_over() {
 	clear();
-  int w, h;
-  getmaxyx(stdscr, h, w);
-  (void) w;
+  int h = getmaxy(stdscr);
   center_print("Game Over", h / 2);
   center_print("If you want to quit press 'q'.", h / 2 + 3);
   center_print("If you want to play again press 'n'.", h / 2 + 4);
@@ -68,9 +67,8 @@ int display(std::vector<Object *> objects, int score, size_t t) {
       }
     }
     x = 0;
-    
   }
-  mvprintw(h - 1, 0, "Score: %d\tTotal Objects: %d", score, objects.size());
+  mvprintw(h - 1, 0, "Score: %d\tTotal Objects: %d\tTick: %zu", score, objects.size(), t);
   refresh();
   return 0;
 }
@@ -81,7 +79,7 @@ std::tuple<std::vector<Object *>, int> collision(std::vector<Object *> objects, 
   for (size_t i = 0; i < objects.size(); i++) {
 	for (size_t j = i + 1; j < objects.size(); j++) {
 		if (objects[i]->get_coordinate(t) == objects[j]->get_coordinate(t)) {
-			if (objects[i]->symbol == PLAYER_SYMBOL && objects[j]->symbol == ENEMY_SYMBOL) {
+			if (!UNBEATABLE && objects[i]->symbol == PLAYER_SYMBOL && objects[j]->symbol == ENEMY_SYMBOL) {
 				game_over();
 			}
 			else if (objects[i]->symbol == ENEMY_SYMBOL && objects[j]->symbol == BULLET_SYMBOL) {
@@ -91,7 +89,7 @@ std::tuple<std::vector<Object *>, int> collision(std::vector<Object *> objects, 
 				i--;
 				j = -2;
 			}
-			else if (objects[i]->symbol == PLAYER_SYMBOL && objects[j]->symbol == ENEMY_BULLET_SYMBOL) {
+			else if (!UNBEATABLE && objects[i]->symbol == PLAYER_SYMBOL && objects[j]->symbol == ENEMY_BULLET_SYMBOL) {
 				game_over();
 			}
 		}
@@ -107,11 +105,12 @@ std::tuple<std::vector<Object *>, int> collision(std::vector<Object *> objects, 
 std::vector<Object *> clean_up(std::vector<Object *> objects, size_t t) {
   int  width, height;
   getmaxyx(stdscr, height, width);
+  int margin = 10;
   for (ssize_t i = objects.size() - 1; i >= 0; i--) {
     Coordinate c = objects[i]->get_coordinate(t);
-    if (c.y < 0 || c.y >= height || c.x < 0 || c.x >= width) {
+    if (c.y < -margin || c.y >= height || c.x < 0 || c.x >= width + margin) {
       objects.erase(objects.begin() + i);
-    }    
+    }
   }
   return objects;
 }
@@ -124,23 +123,29 @@ int64_t datetime_millisec() {
 
 int main(void) {
   std::vector<Object *> objects;
-  size_t frame_tick = 0; // increment every 100ms
+  size_t frame_tick = 0; // increment along with FLAME_RATE
 
   // player spawn
   objects.push_back(new Player(10, 10, frame_tick, [](int t) {return Coordinate(-t, 0); }, 'P'));
-  //enemy
-  objects.push_back(new Enemy(40, 10, frame_tick, [](int t) {return Coordinate(-t, 0); }, 'X'));
-  int score = 0;
   initscr();
   noecho(); // キーが入力されても表示しない
   curs_set(0);// カーソルを非表示
   timeout(50);
+  srand(time(0));
+  int score = 0;
   auto now_time = datetime_millisec();
   while (1) {
     int ch = getch();
     if (ch == 'q') {
       break;
     }
+    // spawning
+    int  width, height;
+    getmaxyx(stdscr, height, width);
+    if (frame_tick % SPAWN_PER_TICK == 0 && rand() % 100 <= SPAWN_RATE){
+      objects.push_back(new Enemy(width - 2, rand() % height - 1, frame_tick, [](int t) {return Coordinate(-t, 0); }, 'X'));
+    }
+
     // update all objects
     std::vector<Object *> new_objects; // == []
     for (size_t i = 0; i < objects.size(); i++) {
