@@ -138,7 +138,7 @@ int main(void) {
   initscr();
   noecho(); // キーが入力されても表示しない
   curs_set(0);// カーソルを非表示
-  timeout(50);
+  timeout(1);
   srand(time(0));
   int score = 0;
   auto now_time = datetime_millisec();
