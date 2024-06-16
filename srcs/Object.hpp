@@ -33,7 +33,7 @@ struct Object
 		Coordinate s = speed((t - t0) / this->frequency); // speed が2 * tの関数の時、1マス飛ばしで出現する弾丸になる。
 		return Coordinate(x + s.x, y + s.y);
 	}
-	virtual std::vector<Object *> update(int ch, int t) = 0; // return new objects created by this object
+	virtual std::vector<Object *> change_status_and_produce_objects(int ch, int t) = 0; // return new objects created by this object
 };
 
 #endif

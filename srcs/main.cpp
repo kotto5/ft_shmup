@@ -160,6 +160,23 @@ int init(std::vector<Object *> &objects) {
   return 0;
 }
 
+int add_list_to_list(std::vector<Object *> &objects, std::vector<Object *> new_objects) {
+  for (size_t i = 0; i < new_objects.size(); i++) {
+    objects.push_back(new_objects[i]);
+  }
+  return 0;
+}
+
+std::vector<Object *> update_status_and_produce_objects(std::vector<Object *> objects, int ch, size_t t) {
+  for (size_t i = 0; i < objects.size(); i++) {
+    std::vector<Object *> tmp = objects[i]->change_status_and_produce_objects(ch, t);
+    for (size_t j = 0; j < tmp.size(); j++) {
+      objects.push_back(tmp[j]);
+    }
+  }
+  return objects;
+}
+
 int main(void) {
   std::vector<Object *> objects;
   init(objects);
@@ -170,21 +187,10 @@ int main(void) {
       break;
     }
     size_t frame_tick = get_tick();
-    std::vector<Object *> new_spawn = spawn(frame_tick);
 
-    // update all objects
-    std::vector<Object *> new_objects; // == []
-    for (size_t i = 0; i < objects.size(); i++) {
-      std::vector<Object *> tmp = objects[i]->update(ch, frame_tick);
-      for (size_t j = 0; j < tmp.size(); j++) {
-        new_objects.push_back(tmp[j]);
-      }
-    }
-    // merge new_objects to objects
-    for (size_t i = 0; i < new_objects.size(); i++) {
-      objects.push_back(new_objects[i]);
-    }
-    // check collision
+    objects = update_status_and_produce_objects(objects, ch, frame_tick);
+    add_list_to_list(objects, spawn(frame_tick));
+
     auto [new_objs, new_score] = collision(objects, frame_tick);
     objects = new_objs;
     score += new_score;
