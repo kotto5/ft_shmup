@@ -33,6 +33,8 @@ public:
 		else if (ch == ' ') {
 			Coordinate bullet_spawn = this->get_coordinate(t);
 			objects.push_back(new Bullet(bullet_spawn.x, bullet_spawn.y, t, [](int t) { return Coordinate(t, 0); }, BULLET_SYMBOL, 1));
+			objects.push_back(new Bullet(bullet_spawn.x, bullet_spawn.y, t, [](int t) { return Coordinate(t, 0.3 * t); }, BULLET_SYMBOL, 1));
+			objects.push_back(new Bullet(bullet_spawn.x, bullet_spawn.y, t, [](int t) { return Coordinate(t, -0.3 * t); }, BULLET_SYMBOL, 1));
 		}
 		return objects;
 	}
