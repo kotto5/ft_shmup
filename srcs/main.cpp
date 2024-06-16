@@ -134,7 +134,7 @@ std::vector<Object *> spawn(size_t t) {
   int  width, height;
   getmaxyx(stdscr, height, width);
   if (t % SPAWN_PER_TICK == 0 && rand() % 100 <= SPAWN_RATE){
-    objects.push_back(new Enemy(width - 2, rand() % height - 1, t, [](int t) {return Coordinate(-t, 0); }, 'X'));
+    objects.push_back(new Enemy(t + width - 2, rand() % height - 1, t, [](int t) {return Coordinate(-t, 0); }, 'X'));
   }
   return objects;
 }
