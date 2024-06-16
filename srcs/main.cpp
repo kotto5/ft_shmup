@@ -141,12 +141,7 @@ std::vector<Object *> spawn(size_t t) {
 
 size_t get_tick() {
   static size_t tick = 0;
-  static int64_t last_time = datetime_millisec();
-  int64_t now_time = datetime_millisec();
-  if ((now_time - last_time) / 1000 * FLAME_RATE > 1) {
-    last_time = now_time;
-    tick ++;
-  }
+  tick ++;
   return tick;
 }
 
