@@ -128,25 +128,32 @@ char  get_input() {
   }
   return ch;
 }
+size_t get_tick() {
+  static size_t tick = 0;
+  static int64_t last_time = datetime_millisec();
+  int64_t now_time = datetime_millisec();
+  if ((now_time - last_time) / 1000 * FLAME_RATE > 1) {
+    last_time = now_time;
+    tick ++;
+  }
+}
 
 int main(void) {
   std::vector<Object *> objects;
-  size_t frame_tick = 0; // increment along with FLAME_RATE
-
   // player spawn
-  objects.push_back(new Player(10, 10, frame_tick, [](int t) {return Coordinate(-t, 0); }, 'P'));
+  objects.push_back(new Player(10, 10, get_tick(), [](int t) {return Coordinate(-t, 0); }, 'P'));
   initscr();
   noecho(); // キーが入力されても表示しない
   curs_set(0);// カーソルを非表示
   timeout(1);
   srand(time(0));
   int score = 0;
-  auto now_time = datetime_millisec();
   while (1) {
     int ch = get_input();
     if (ch == 'q') {
       break;
     }
+    size_t frame_tick = get_tick();
     // spawning
     int  width, height;
     getmaxyx(stdscr, height, width);
@@ -175,9 +182,5 @@ int main(void) {
     // clean up
     objects = clean_up(objects, frame_tick);
     usleep(1000 * 1000 / FLAME_RATE);
-    if ((datetime_millisec()  - now_time) / 1000 * FLAME_RATE > 1) {
-      now_time = datetime_millisec();
-      frame_tick ++;
-    }
   }
 }
