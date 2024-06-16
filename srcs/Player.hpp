@@ -13,23 +13,24 @@ public:
 		int width, height;
 		getmaxyx(stdscr, height, width);
 		int left_bound = t + 1;
-		int right_bound = left_bound + width;
+		int right_bound = left_bound + width - 3;
 		Coordinate coo = get_coordinate(t);
 		if (coo.x == left_bound) { // border barriers
 			this->x++;
+			coo = get_coordinate(t);
 		}
 		std::vector<Object *> objects;
 		if (ch == 'w') {
-			coo.y == 1 ? this->y = 1 : this->y--;	
+			this->y += coo.y - 1 <= 0 ? 0 : -1;
 		}
 		else if (ch == 's') {
-			coo.y == height - 3 ? this->y = height - 3 : this->y++;
+			this->y += coo.y + 1 >= height - 1 ? 0 : 1;
 		}
 		else if (ch == 'a') {
-			coo.x == left_bound ? this->x = left_bound : this->x--;
+			this->x += coo.x - 1 <= left_bound ? 0 : -1;
 		}
 		else if (ch == 'd') {
-			this->x = (coo.x == right_bound ? right_bound - 1 : this->x + 1);
+			this->x += coo.x + 1 >= right_bound ? 0 : 1;
 		}
 		else if (ch == ' ') {
 			Coordinate bullet_spawn = this->get_coordinate(t);
