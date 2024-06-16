@@ -121,6 +121,14 @@ int64_t datetime_millisec() {
   return std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
 }
 
+char  get_input() {
+  int ch = getch();
+  while (getch() != ERR) {
+    continue;
+  }
+  return ch;
+}
+
 int main(void) {
   std::vector<Object *> objects;
   size_t frame_tick = 0; // increment along with FLAME_RATE
@@ -135,7 +143,7 @@ int main(void) {
   int score = 0;
   auto now_time = datetime_millisec();
   while (1) {
-    int ch = getch();
+    int ch = get_input();
     if (ch == 'q') {
       break;
     }
