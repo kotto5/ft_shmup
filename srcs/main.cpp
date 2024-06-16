@@ -49,6 +49,7 @@ int	game_over() {
 
 int display(std::vector<Object *> objects, int score, size_t t) {
   clear();
+  Coordinate player_c(1, 1);
   for (size_t i = 0; i < objects.size(); i++) {
     char synbol = objects[i]->get_symbol();
     if (objects[i]->get_tag() == "block") {
@@ -63,8 +64,12 @@ int display(std::vector<Object *> objects, int score, size_t t) {
     }
     else {
       Coordinate c = objects[i]->get_coordinate(t);
+      if (objects[i]->get_symbol() == PLAYER_SYMBOL) {
+        player_c = c;
+      }
+      char synbol = objects[i]->get_symbol();
       char tmp[2] = {synbol, '\0'};
-      mvprintw(c.y, c.x, tmp); // no camera move
+      mvprintw(c.y, c.x - t, tmp); // no camera move
     }
   }
   int  x, y, w, h;
@@ -82,6 +87,7 @@ int display(std::vector<Object *> objects, int score, size_t t) {
     x = 0;
   }
   mvprintw(h - 1, 0, "Score: %d\tTotal Objects: %d\tTick: %zu", score, objects.size(), t);
+  mvprintw(h - 1, w - 1 - 15, "Player: %d, %d", player_c.x, player_c.y);
   refresh();
   return 0;
 }
@@ -124,13 +130,13 @@ std::tuple<std::vector<Object *>, int> collision(std::vector<Object *> objects, 
 /// @param objects 削除判定前のobjects
 /// @param t 
 /// @return 不要なインスタンスが削除された状態のobjectsを返す
-std::vector<Object *> clean_up(std::vector<Object *> objects, size_t t) {
-  int  width, height;
-  getmaxyx(stdscr, height, width);
+std::vector<Object *> delete_outside_objects(std::vector<Object *> objects, size_t t) {
+  int  width;
+  width = getmaxx(stdscr);
   int margin = 10;
   for (ssize_t i = objects.size() - 1; i >= 0; i--) {
     Coordinate c = objects[i]->get_coordinate(t);
-    if (c.y < -margin || c.y >= height || c.x < 0 || c.x >= width + margin) {
+    if (c.x < (int)t || c.x >= width + (int)t + margin) {
       objects.erase(objects.begin() + i);
     }
   }
@@ -143,59 +149,81 @@ int64_t datetime_millisec() {
   return std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
 }
 
-int main(void) {
-  std::vector<Object *> objects;
-  size_t frame_tick = 0; // increment along with FLAME_RATE
+char  get_input() {
+  int ch = getch();
+  while (getch() != ERR) {
+    continue;
+  }
+  return ch;
+}
 
-  // player spawn
-  objects.push_back(new Player(10, 10, frame_tick, [](int t) {return Coordinate(-t, 0); }, 'P'));
+std::vector<Object *> spawn(size_t t) {
+  std::vector<Object *> objects;
+  int  width, height;
+  getmaxyx(stdscr, height, width);
+  if (t % SPAWN_PER_TICK == 0 && rand() % 100 <= SPAWN_RATE){
+    objects.push_back(new Enemy(t + width - 2, rand() % height - 1, t, [](int t) {return Coordinate(-t, 0); }, 'X'));
+  }
+  if (frame_tick % SPAWN_PER_TICK == 0 && rand() % 100 <= SPAWN_RATE){ // block spawn
+    int block_width = rand() % 5 + 1;
+    int block_height = rand() % 5 + 1;
+    objects.push_back(new Block(width - 2 - block_height, rand() % height - 3 - block_height, frame_tick, [](int t) {return Coordinate(-t, 0); }, '#', block_width, block_height));
+  }
+  return objects;
+}
+
+size_t get_tick() {
+  static size_t tick = 0;
+  tick ++;
+  return tick;
+}
+
+int init(std::vector<Object *> &objects) {
   initscr();
   noecho(); // キーが入力されても表示しない
   curs_set(0);// カーソルを非表示
-  timeout(50);
+  timeout(1);
   srand(time(0));
+  objects.push_back(new Player(30, 5, 0, [](int t) { return Coordinate(t, 0); }, PLAYER_SYMBOL));
+  return 0;
+}
+
+int add_list_to_list(std::vector<Object *> &objects, std::vector<Object *> new_objects) {
+  for (size_t i = 0; i < new_objects.size(); i++) {
+    objects.push_back(new_objects[i]);
+  }
+  return 0;
+}
+
+std::vector<Object *> update_status_and_produce_objects(std::vector<Object *> objects, int ch, size_t t) {
+  for (size_t i = 0; i < objects.size(); i++) {
+    std::vector<Object *> tmp = objects[i]->change_status_and_produce_objects(ch, t);
+    for (size_t j = 0; j < tmp.size(); j++) {
+      objects.push_back(tmp[j]);
+    }
+  }
+  return objects;
+}
+
+int main(void) {
+  std::vector<Object *> objects;
+  init(objects);
   int score = 0;
-  auto now_time = datetime_millisec();
   while (1) {
-    int ch = getch();
+    int ch = get_input();
     if (ch == 'q') {
       break;
     }
-    // spawning
-    int  width, height;
-    getmaxyx(stdscr, height, width);
-    if (frame_tick % SPAWN_PER_TICK == 0 && rand() % 100 <= SPAWN_RATE){ // enemy spawn
-      objects.push_back(new Enemy(width - 2, rand() % height - 1, frame_tick, [](int t) {return Coordinate(-t, 0); }, 'X'));
-    }
-    if (frame_tick % SPAWN_PER_TICK == 0 && rand() % 100 <= SPAWN_RATE){ // block spawn
-      int block_width = rand() % 5 + 1;
-      int block_height = rand() % 5 + 1;
-      objects.push_back(new Block(width - 2 - block_height, rand() % height - 3 - block_height, frame_tick, [](int t) {return Coordinate(-t, 0); }, '#', block_width, block_height));
-    }
+    size_t frame_tick = get_tick();
 
-    // update all objects
-    std::vector<Object *> new_objects; // == []
-    for (size_t i = 0; i < objects.size(); i++) {
-      std::vector<Object *> tmp = objects[i]->update(ch, frame_tick);
-      for (size_t j = 0; j < tmp.size(); j++) {
-        new_objects.push_back(tmp[j]);
-      }
-    }
-    // merge new_objects to objects
-    for (size_t i = 0; i < new_objects.size(); i++) {
-      objects.push_back(new_objects[i]);
-    }
-    // check collision
+    objects = update_status_and_produce_objects(objects, ch, frame_tick);
+    add_list_to_list(objects, spawn(frame_tick));
     auto [new_objs, new_score] = collision(objects, frame_tick);
     objects = new_objs;
     score += new_score;
-    // display all objects
+    objects = delete_outside_objects(objects, frame_tick);
+
     display(objects, score, frame_tick);
-    // clean up
-    objects = clean_up(objects, frame_tick);
-    if ((datetime_millisec() - now_time) * FLAME_RATE > 1 * 1000) {
-      now_time = datetime_millisec();
-      frame_tick ++;
-    }
+    usleep(1000 * 1000 / FLAME_RATE);
   }
 }
