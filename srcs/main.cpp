@@ -103,12 +103,12 @@ std::tuple<std::vector<Object *>, int> collision(std::vector<Object *> objects, 
 /// @param t 
 /// @return 不要なインスタンスが削除された状態のobjectsを返す
 std::vector<Object *> delete_outside_objects(std::vector<Object *> objects, size_t t) {
-  int  width, height;
-  getmaxyx(stdscr, height, width);
+  int  width;
+  width = getmaxx(stdscr);
   int margin = 10;
   for (ssize_t i = objects.size() - 1; i >= 0; i--) {
     Coordinate c = objects[i]->get_coordinate(t);
-    if (c.y < -margin || c.y >= height || c.x < 0 || c.x >= width + margin) {
+    if (c.x < (int)t || c.x >= width + (int)t + margin) {
       objects.erase(objects.begin() + i);
     }
   }
