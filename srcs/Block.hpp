@@ -18,7 +18,7 @@ public:
 		this->texture = symbol;
 	}
 
-	std::vector<Object *> update(int ch, int t) {
+	std::vector<Object *> change_status_and_produce_objects(int ch, int t) {
 		(void)ch;
 		(void)t;
 		std::vector<Object *> objects;

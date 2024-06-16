@@ -157,17 +157,17 @@ char  get_input() {
   return ch;
 }
 
-std::vector<Object *> spawn(size_t t) {
+std::vector<Object *> spawn(size_t tic) {
   std::vector<Object *> objects;
   int  width, height;
   getmaxyx(stdscr, height, width);
-  if (t % SPAWN_PER_TICK == 0 && rand() % 100 <= SPAWN_RATE){
-    objects.push_back(new Enemy(t + width - 2, rand() % height - 1, t, [](int t) {return Coordinate(-t, 0); }, 'X'));
+  if (tic % SPAWN_PER_TICK == 0 && rand() % 100 <= SPAWN_RATE){
+    objects.push_back(new Enemy(tic + width - 2, rand() % height - 1, tic, [](int t) {return Coordinate(-t, 0); }, 'X'));
   }
-  if (frame_tick % SPAWN_PER_TICK == 0 && rand() % 100 <= SPAWN_RATE){ // block spawn
+  if (tic % SPAWN_PER_TICK == 0 && rand() % 100 <= SPAWN_RATE){ // block spawn
     int block_width = rand() % 5 + 1;
     int block_height = rand() % 5 + 1;
-    objects.push_back(new Block(width - 2 - block_height, rand() % height - 3 - block_height, frame_tick, [](int t) {return Coordinate(-t, 0); }, '#', block_width, block_height));
+    objects.push_back(new Block(width - 2 - block_height, rand() % height - 3 - block_height, tic, [](int t) {return Coordinate(-t, 0); }, '#', block_width, block_height));
   }
   return objects;
 }
