@@ -162,7 +162,7 @@ std::vector<Object *> spawn(size_t tic) {
   int  width, height;
   getmaxyx(stdscr, height, width);
   if (tic % SPAWN_PER_TICK == 0 && rand() % 100 <= SPAWN_RATE){
-    objects.push_back(new Enemy(tic + width - 2, rand() % height - 1, tic, [](int t) {return Coordinate(-t, 0); }, 'X'));
+    objects.push_back(new Enemy(tic + width - 2, rand() % height - 1, tic, [](int t) {(void)t; return Coordinate(0, 0); }, 'X'));
   }
   if (tic % SPAWN_PER_TICK == 0 && rand() % 100 <= SPAWN_RATE){ // block spawn
     int block_width = rand() % 5 + 1;
