@@ -69,7 +69,7 @@ int display(std::vector<Object *> objects, int score, size_t t) {
       }
       char synbol = objects[i]->get_symbol();
       char tmp[2] = {synbol, '\0'};
-      mvprintw(c.y, c.x - t, tmp); // no camera move
+      mvprintw(c.y, c.x - t, tmp);
     }
   }
   int  x, y, w, h;
