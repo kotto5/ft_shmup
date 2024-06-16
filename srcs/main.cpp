@@ -102,7 +102,7 @@ std::tuple<std::vector<Object *>, int> collision(std::vector<Object *> objects, 
 /// @param objects 削除判定前のobjects
 /// @param t 
 /// @return 不要なインスタンスが削除された状態のobjectsを返す
-std::vector<Object *> clean_up(std::vector<Object *> objects, size_t t) {
+std::vector<Object *> delete_outside_objects(std::vector<Object *> objects, size_t t) {
   int  width, height;
   getmaxyx(stdscr, height, width);
   int margin = 10;
@@ -194,10 +194,9 @@ int main(void) {
     auto [new_objs, new_score] = collision(objects, frame_tick);
     objects = new_objs;
     score += new_score;
-    // display all objects
+    objects = delete_outside_objects(objects, frame_tick);
+
     display(objects, score, frame_tick);
-    // clean up
-    objects = clean_up(objects, frame_tick);
     usleep(1000 * 1000 / FLAME_RATE);
   }
 }
