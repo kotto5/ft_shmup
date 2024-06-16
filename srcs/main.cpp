@@ -166,6 +166,7 @@ int main(void) {
     display(objects, score, frame_tick);
     // clean up
     objects = clean_up(objects, frame_tick);
+    usleep(1000 * 1000 / FLAME_RATE);
     if ((datetime_millisec()  - now_time) / 1000 * FLAME_RATE > 1) {
       now_time = datetime_millisec();
       frame_tick ++;
