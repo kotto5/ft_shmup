@@ -21,15 +21,13 @@ struct Object
 	char symbol;
 	std::string tag;
 
-	size_t frequency;
 	std::function<Coordinate(int)> speed;
-	Object(int x, int y, int t0, std::function<Coordinate(int)> speed, char symbol, int frequency = 4, std::string tag = "") {
+	Object(int x, int y, int t0, std::function<Coordinate(int)> speed, char symbol, std::string tag = "") {
 		this->x = x;
 		this->y = y;
 		this->t0 = t0;
 		this->speed = speed;
 		this->symbol = symbol;
-		this->frequency = frequency;
 		this->tag = tag;
 	}
 	std::string get_tag() {

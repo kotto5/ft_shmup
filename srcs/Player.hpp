@@ -8,7 +8,7 @@
 class Player : public Object
 {
 public:
-	Player(int x, int y, int t0, std::function<Coordinate(int)> speed, char symbol, int frequency = 8) : Object(x, y, t0, speed, symbol, frequency) {}
+	Player(int x, int y, int t0, std::function<Coordinate(int)> speed, char symbol) : Object(x, y, t0, speed, symbol) {}
 	std::vector<Object *> change_status_and_produce_objects(int ch, int t) {
 		int width, height;
 		getmaxyx(stdscr, height, width);
@@ -33,9 +33,9 @@ public:
 		}
 		else if (ch == ' ') {
 			Coordinate bullet_spawn = this->get_coordinate(t);
-			objects.push_back(new Bullet(bullet_spawn.x, bullet_spawn.y, t, [](int t) { return Coordinate(t * 3, 0); }, BULLET_SYMBOL, 1));
-			objects.push_back(new Bullet(bullet_spawn.x, bullet_spawn.y, t, [](int t) { return Coordinate(t * 3, 0.3 * t); }, BULLET_SYMBOL, 1));
-			objects.push_back(new Bullet(bullet_spawn.x, bullet_spawn.y, t, [](int t) { return Coordinate(t * 3, -0.3 * t); }, BULLET_SYMBOL, 1));
+			objects.push_back(new Bullet(bullet_spawn.x, bullet_spawn.y, t, [](int t) { return Coordinate(t * 3, 0); }, BULLET_SYMBOL));
+			objects.push_back(new Bullet(bullet_spawn.x, bullet_spawn.y, t, [](int t) { return Coordinate(t * 3, 0.3 * t); }, BULLET_SYMBOL));
+			objects.push_back(new Bullet(bullet_spawn.x, bullet_spawn.y, t, [](int t) { return Coordinate(t * 3, -0.3 * t); }, BULLET_SYMBOL));
 		}
 		return objects;
 	}

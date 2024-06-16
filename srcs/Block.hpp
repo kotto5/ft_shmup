@@ -12,7 +12,7 @@ public:
 	int height;
 	char texture;
 
-	Block(int x, int y, int t0, std::function<Coordinate(int)> speed, char symbol, int width, int height, int frequency = 4, std::string tag = "block") : Object(x, y, t0, speed, symbol, frequency, tag) {
+	Block(int x, int y, int t0, std::function<Coordinate(int)> speed, char symbol, int width, int height, std::string tag = "block") : Object(x, y, t0, speed, symbol, tag) {
 		this->width = width;
 		this->height = height;
 		this->texture = symbol;
