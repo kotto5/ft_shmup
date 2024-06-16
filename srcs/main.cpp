@@ -156,7 +156,7 @@ int init(std::vector<Object *> &objects) {
   curs_set(0);// カーソルを非表示
   timeout(1);
   srand(time(0));
-  objects.push_back(new Player(5, 5, 0, [](int t) { (void)t; return Coordinate(0, 0); }, PLAYER_SYMBOL));
+  objects.push_back(new Player(30, 5, 0, [](int t) { return Coordinate(t, 0); }, PLAYER_SYMBOL));
   return 0;
 }
 
