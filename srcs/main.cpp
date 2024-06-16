@@ -136,17 +136,22 @@ size_t get_tick() {
     last_time = now_time;
     tick ++;
   }
+  return tick;
 }
 
-int main(void) {
-  std::vector<Object *> objects;
-  // player spawn
-  objects.push_back(new Player(10, 10, get_tick(), [](int t) {return Coordinate(-t, 0); }, 'P'));
+int init(std::vector<Object *> &objects) {
   initscr();
   noecho(); // キーが入力されても表示しない
   curs_set(0);// カーソルを非表示
   timeout(1);
   srand(time(0));
+  objects.push_back(new Player(5, 5, 0, [](int t) { (void)t; return Coordinate(0, 0); }, PLAYER_SYMBOL));
+  return 0;
+}
+
+int main(void) {
+  std::vector<Object *> objects;
+  init(objects);
   int score = 0;
   while (1) {
     int ch = get_input();
