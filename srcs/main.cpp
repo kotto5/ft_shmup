@@ -48,8 +48,12 @@ int	game_over() {
 
 int display(std::vector<Object *> objects, int score, size_t t) {
   clear();
+  Coordinate player_c(1, 1);
   for (size_t i = 0; i < objects.size(); i++) {
     Coordinate c = objects[i]->get_coordinate(t);
+    if (objects[i]->get_symbol() == PLAYER_SYMBOL) {
+      player_c = c;
+    }
     char synbol = objects[i]->get_symbol();
     char tmp[2] = {synbol, '\0'};
     mvprintw(c.y, c.x - t, tmp); // no camera move
@@ -69,6 +73,7 @@ int display(std::vector<Object *> objects, int score, size_t t) {
     x = 0;
   }
   mvprintw(h - 1, 0, "Score: %d\tTotal Objects: %d\tTick: %zu", score, objects.size(), t);
+  mvprintw(h - 1, w - 1 - 15, "Player: %d, %d", player_c.x, player_c.y);
   refresh();
   return 0;
 }
