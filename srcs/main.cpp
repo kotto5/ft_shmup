@@ -58,7 +58,7 @@ int display(std::vector<Object *> objects, int score, size_t t) {
       for (int w = 0; w < block->width; w++) {
         for (int h = 0; h < block->height; h++) {
           char tmp[2] = {synbol, '\0'};
-          mvprintw(c.y + h, c.x + w, tmp);
+          mvprintw(c.y + h, c.x + w - t, tmp);
         }
       }
     }
